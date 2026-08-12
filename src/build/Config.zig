@@ -130,7 +130,7 @@ pub fn init(b: *std.Build, appVersion: []const u8, libVersion: []const u8) !Conf
     // Determine whether GTK supports X11 and Wayland. This is always safe
     // to run even on non-Linux platforms because any failures result in
     // defaults.
-    const gtk_targets = gtk.targets(b);
+    const gtk_targets = gtk.targets(b, target.result);
 
     // Grab the environment from build state
     const env = &b.graph.environ_map;
