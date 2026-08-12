@@ -53,6 +53,8 @@ jobs:
         env:
           PKG_CONFIG_ALLOW_SYSTEM_LIBS: "1"
           PKG_CONFIG_ALLOW_SYSTEM_CFLAGS: "1"
+          PYTHONUTF8: "1"
+          PYTHONIOENCODING: "utf-8"
         run: |
           pkg-config --libs gtk4
           zig build -Dapp-runtime=gtk -Dtarget=x86_64-windows-gnu
