@@ -30,6 +30,7 @@ jobs:
             mingw-w64-x86_64-libadwaita
             mingw-w64-x86_64-pkgconf
             mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-blueprint-compiler
 
       - name: Setup Zig
         uses: mlugg/setup-zig@v2
