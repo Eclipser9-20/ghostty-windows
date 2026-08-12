@@ -1,0 +1,23 @@
+on:
+  push:
+    branches:
+      - "windows-gtk-app"
+  workflow_dispatch: {}
+
+name: Windows App Build (experimental)
+
+jobs:
+  build-windows-gtk:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Zig
+        uses: mlugg/setup-zig@v2
+
+      - name: Attempt GTK app-runtime build
+        shell: pwsh
+        run: |
+          zig build -Dapp-runtime=gtk
