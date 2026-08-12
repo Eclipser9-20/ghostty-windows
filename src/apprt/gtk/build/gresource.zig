@@ -249,6 +249,15 @@ fn genUi(
     , .{build_info.resource_path});
 
     for (files.items) |ui_file| {
+        // Build paths for this step mix '/' (hardcoded blueprint path
+        // suffixes) and the native path separator (from Zig's cache
+        // path joining), so normalize before comparing on Windows.
+        const ui_file_normalized = try alloc.dupe(u8, ui_file);
+        defer alloc.free(ui_file_normalized);
+        if (std.fs.path.sep != '/') {
+            std.mem.replaceScalar(u8, ui_file_normalized, std.fs.path.sep, '/');
+        }
+
         for (blueprints) |bp| {
             const expected = try std.fmt.allocPrint(
                 alloc,
@@ -256,7 +265,7 @@ fn genUi(
                 .{ bp.major, bp.minor, bp.name },
             );
             defer alloc.free(expected);
-            if (!std.mem.endsWith(u8, ui_file, expected)) continue;
+            if (!std.mem.endsWith(u8, ui_file_normalized, expected)) continue;
             try writer.print(
                 "    <file compressed=\"true\" preprocess=\"xml-stripblanks\" alias=\"{d}.{d}/{s}.ui\">{s}</file>\n",
                 .{ bp.major, bp.minor, bp.name, ui_file },
