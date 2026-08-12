@@ -41,13 +41,13 @@ jobs:
             cp -n "$f" "${f%.dll.a}.a"
           done
 
-      - name: Diagnose blueprint-compiler
+      - name: Wrap blueprint-compiler in a .cmd shim (Windows can't exec a bare shebang script)
         run: |
-          which blueprint-compiler || true
-          ls -la /mingw64/bin/blueprint-compiler* || true
-          file /mingw64/bin/blueprint-compiler* || true
-          head -5 /mingw64/bin/blueprint-compiler || true
-          blueprint-compiler --version || true
+          cat > /mingw64/bin/blueprint-compiler.cmd <<'EOF'
+          @echo off
+          python3 "%~dp0blueprint-compiler" %*
+          EOF
+          cmd //c blueprint-compiler.cmd --version
 
       - name: Attempt GTK app-runtime build
         env:
