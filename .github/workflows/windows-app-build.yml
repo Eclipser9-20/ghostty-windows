@@ -34,6 +34,12 @@ jobs:
       - name: Setup Zig
         uses: mlugg/setup-zig@v2
 
+      - name: Alias MinGW .dll.a import libs to .a (Zig doesn't recognize .dll.a)
+        run: |
+          for f in /mingw64/lib/*.dll.a; do
+            cp -n "$f" "${f%.dll.a}.a"
+          done
+
       - name: Attempt GTK app-runtime build
         env:
           PKG_CONFIG_ALLOW_SYSTEM_LIBS: "1"
