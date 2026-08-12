@@ -41,6 +41,14 @@ jobs:
             cp -n "$f" "${f%.dll.a}.a"
           done
 
+      - name: Diagnose blueprint-compiler
+        run: |
+          which blueprint-compiler || true
+          ls -la /mingw64/bin/blueprint-compiler* || true
+          file /mingw64/bin/blueprint-compiler* || true
+          head -5 /mingw64/bin/blueprint-compiler || true
+          blueprint-compiler --version || true
+
       - name: Attempt GTK app-runtime build
         env:
           PKG_CONFIG_ALLOW_SYSTEM_LIBS: "1"
