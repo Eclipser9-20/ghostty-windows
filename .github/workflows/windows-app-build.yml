@@ -10,14 +10,30 @@ jobs:
   build-windows-gtk:
     runs-on: windows-latest
     timeout-minutes: 45
+    defaults:
+      run:
+        shell: msys2 {0}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup MSYS2 with GTK4/libadwaita
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          path-type: inherit
+          install: >-
+            mingw-w64-x86_64-gtk4
+            mingw-w64-x86_64-libadwaita
+            mingw-w64-x86_64-pkgconf
+            mingw-w64-x86_64-gcc
 
       - name: Setup Zig
         uses: mlugg/setup-zig@v2
 
       - name: Attempt GTK app-runtime build
-        shell: pwsh
         run: |
-          zig build -Dapp-runtime=gtk
+          zig build -Dapp-runtime=gtk -Dtarget=x86_64-windows-gnu
