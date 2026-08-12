@@ -35,5 +35,9 @@ jobs:
         uses: mlugg/setup-zig@v2
 
       - name: Attempt GTK app-runtime build
+        env:
+          PKG_CONFIG_ALLOW_SYSTEM_LIBS: "1"
+          PKG_CONFIG_ALLOW_SYSTEM_CFLAGS: "1"
         run: |
+          pkg-config --libs gtk4
           zig build -Dapp-runtime=gtk -Dtarget=x86_64-windows-gnu
