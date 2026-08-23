@@ -31,9 +31,19 @@ jobs:
             mingw-w64-x86_64-pkgconf
             mingw-w64-x86_64-gcc
             mingw-w64-x86_64-blueprint-compiler
+            mingw-w64-x86_64-libffi
+            mingw-w64-x86_64-pcre2
+            mingw-w64-x86_64-libiconv
+            mingw-w64-x86_64-fribidi
+            mingw-w64-x86_64-libthai
+            mingw-w64-x86_64-appstream
 
       - name: Setup Zig
         uses: mlugg/setup-zig@v2
+
+      - name: Diagnostic - list relevant MinGW lib files before aliasing
+        run: |
+          ls -la /mingw64/lib/ | grep -Ei 'glib-2\.0|ffi|pcre2|iconv|fribidi|thai|appstream' || true
 
       - name: Alias MinGW .dll.a import libs to .a (Zig doesn't recognize .dll.a)
         run: |

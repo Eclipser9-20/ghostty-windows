@@ -893,6 +893,31 @@ fn addGtkNg(
         translated.mod.addCSourceFile(.{ .file = dist.resources_c.path(b), .flags = &.{} });
         step.root_module.addImport("ghostty_gtk_resources", translated.mod);
     }
+
+    // On Windows, MSYS2's glib2/gtk4/libadwaita packages end up statically
+    // linking some pieces (e.g. libglib-2.0.a pulls in gregex.c.obj, which
+    // uses PCRE2; GObject introspection closures use libffi; libadwaita's
+    // appstream integration uses libappstream). Static linking doesn't
+    // automatically resolve transitive shared-library dependencies the way
+    // dynamic linking does, so we must link them explicitly here, along
+    // with a handful of Win32 system libraries glib itself calls into
+    // (networking/COM/shell APIs) that would otherwise only be pulled in
+    // implicitly by glib-2.0.dll's own import table.
+    if (target.result.os.tag == .windows) {
+        step.root_module.linkSystemLibrary("ffi", dynamic_link_opts);
+        step.root_module.linkSystemLibrary("pcre2-8", dynamic_link_opts);
+        step.root_module.linkSystemLibrary("iconv", dynamic_link_opts);
+        step.root_module.linkSystemLibrary("fribidi", dynamic_link_opts);
+        step.root_module.linkSystemLibrary("thai", dynamic_link_opts);
+        step.root_module.linkSystemLibrary("appstream", dynamic_link_opts);
+
+        step.root_module.linkSystemLibrary("ole32", .{});
+        step.root_module.linkSystemLibrary("shlwapi", .{});
+        step.root_module.linkSystemLibrary("dnsapi", .{});
+        step.root_module.linkSystemLibrary("iphlpapi", .{});
+        step.root_module.linkSystemLibrary("ws2_32", .{});
+        step.root_module.linkSystemLibrary("mingwex", .{});
+    }
 }
 
 /// Add only the dependencies required for `Config.simd` enabled. This also

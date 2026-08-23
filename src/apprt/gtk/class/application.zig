@@ -49,6 +49,17 @@ const media = @import("../media.zig");
 const log = std.log.scoped(.gtk_ghostty_application);
 
 extern "c" fn setenv(name: ?[*]const u8, value: ?[*]const u8, overwrite: c_int) c_int;
+extern "c" fn _putenv_s(name: ?[*:0]const u8, value: ?[*:0]const u8) c_int;
+
+/// Cross-platform environment variable setter. `setenv` is POSIX-only;
+/// MinGW/ucrt on Windows provides `_putenv_s` instead.
+fn setEnvVar(name: [*:0]const u8, value: [*:0]const u8) void {
+    if (comptime builtin.os.tag == .windows) {
+        _ = _putenv_s(name, value);
+    } else {
+        _ = setenv(name, value, 1);
+    }
+}
 
 /// Function used to funnel GLib/GObject/GTK log messages into Zig's logging
 /// system rather than just getting dumped directly to stderr.
@@ -292,7 +303,7 @@ pub const Application = extern struct {
             };
             if (config.language) |language| {
                 // Override LANG if we need to (sync global environs if so)
-                _ = setenv("LANG", @ptrCast(language), 1);
+                setEnvVar("LANG", @ptrCast(language));
                 global.syncEnviron();
             }
             break :saved_language old_language;
@@ -3386,7 +3397,7 @@ fn setGtkEnv(config: *const CoreConfig) std.Io.Writer.Error!void {
         try writer.writeByte(0);
         const value = writer.buffered();
         log.warn("setting GDK_DEBUG={s}", .{value[0 .. value.len - 1]});
-        _ = setenv("GDK_DEBUG", @ptrCast(value[0 .. value.len - 1 :0]), 1);
+        setEnvVar("GDK_DEBUG", @ptrCast(value[0 .. value.len - 1 :0]));
     }
 
     {
@@ -3403,7 +3414,7 @@ fn setGtkEnv(config: *const CoreConfig) std.Io.Writer.Error!void {
         try writer.writeByte(0);
         const value = writer.buffered();
         log.warn("setting GDK_DISABLE={s}", .{value[0 .. value.len - 1]});
-        _ = setenv("GDK_DISABLE", @ptrCast(value[0 .. value.len - 1 :0]), 1);
+        setEnvVar("GDK_DISABLE", @ptrCast(value[0 .. value.len - 1 :0]));
     }
 
     // Sync environ after altering system env
