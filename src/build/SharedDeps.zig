@@ -489,7 +489,20 @@ pub fn add(
     // conflict with MSVC's own C++ runtime headers. The MSVC SDK
     // include directories (already added via linkLibC above) contain
     // both C and C++ headers, so linkLibCpp is not needed.
-    if (step.rootModuleTarget().abi != .msvc) {
+    //
+    // On windows-gnu (MinGW), the same problem occurs: Zig's linkLibCpp
+    // forces its bundled libc++/libc++abi include paths ahead of the
+    // MinGW/UCRT C headers, which breaks libc++'s own "am I configured
+    // correctly" self-check (it can't find its own <string.h> etc. before
+    // the system ones) when compiling our vendored SIMD C++ sources
+    // (highway/simdutf), which are built in HWY_NO_LIBCXX/SIMDUTF_NO_LIBCXX
+    // mode specifically so they don't need any C++ standard library at
+    // all. So skip linkLibCpp there too; nothing else in this module
+    // currently requires libc++ on windows-gnu.
+    if (step.rootModuleTarget().abi != .msvc and
+        !(step.rootModuleTarget().os.tag == .windows and
+            step.rootModuleTarget().abi == .gnu))
+    {
         step.root_module.link_libcpp = true;
     }
 
