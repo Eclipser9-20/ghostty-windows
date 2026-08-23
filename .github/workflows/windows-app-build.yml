@@ -48,8 +48,18 @@ jobs:
 
       - name: Alias MinGW .dll.a import libs to .a (Zig doesn't recognize .dll.a)
         run: |
+          # Overwrite, don't skip: some packages (libthai, etc.) ship BOTH a
+          # genuine static archive (libX.a) and a dynamic import lib
+          # (libX.dll.a). We want Zig to always link the dynamic one (that's
+          # the whole point of dynamic_link_opts.preferred_link_mode), but
+          # Zig only recognizes the .a extension — so if we don't clobber a
+          # pre-existing real static libX.a here, Zig silently links THAT
+          # instead, which then drags in its own full transitive static
+          # dependency chain (this is what caused the libdatrie/libffi/
+          # pcre2/appstream chase — every one of those was actually a static
+          # archive's own missing dependency, not a genuinely missing lib).
           for f in /mingw64/lib/*.dll.a; do
-            cp -n "$f" "${f%.dll.a}.a"
+            cp "$f" "${f%.dll.a}.a"
           done
 
       - name: Wrap blueprint-compiler in a .cmd shim (Windows can't exec a bare shebang script)
