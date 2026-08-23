@@ -36,6 +36,7 @@ jobs:
             mingw-w64-x86_64-libiconv
             mingw-w64-x86_64-fribidi
             mingw-w64-x86_64-libthai
+            mingw-w64-x86_64-libdatrie
             mingw-w64-x86_64-appstream
 
       - name: Setup Zig
