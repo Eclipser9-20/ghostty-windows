@@ -722,7 +722,6 @@ fn addGtkNg(
             .{ "glibunix", "glibunix2" },
             .{ "gobject", "gobject2" },
             .{ "gtk", "gtk4" },
-            .{ "xlib", "xlib2" },
         };
         inline for (gobject_imports) |import| {
             const name, const module = import;
@@ -771,6 +770,10 @@ fn addGtkNg(
             step.root_module.addImport(
                 "gdk_x11",
                 gobject.module("gdkx114"),
+            );
+            step.root_module.addImport(
+                "xlib",
+                gobject.module("xlib2"),
             );
         }
     }
