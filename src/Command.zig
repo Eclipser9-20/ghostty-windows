@@ -151,7 +151,7 @@ pub const RtPreExecInfo = if (@hasDecl(apprt.runtime, "pre_exec")) apprt.runtime
 /// Configuration information needed by the apprt post fork function. Note
 /// that this should be a trivially copyable struct and not require any
 /// allocation/deallocation.
-pub const RtPostForkInfo = if (@hasDecl(apprt.runtime, "post_fork")) apprt.runtime.post_fork.PostForkInfo else struct {
+pub const RtPostForkInfo = if (builtin.os.tag == .linux and @hasDecl(apprt.runtime, "post_fork")) apprt.runtime.post_fork.PostForkInfo else struct {
     pub inline fn init(_: *const configpkg.Config) @This() {
         return .{};
     }

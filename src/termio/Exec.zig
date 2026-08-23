@@ -1054,7 +1054,7 @@ const Subprocess = struct {
             },
             .rt_pre_exec = if (comptime @hasDecl(apprt.runtime, "pre_exec")) apprt.runtime.pre_exec.preExec else null,
             .rt_pre_exec_info = self.rt_pre_exec_info,
-            .rt_post_fork = if (comptime @hasDecl(apprt.runtime, "post_fork")) apprt.runtime.post_fork.postFork else null,
+            .rt_post_fork = if (comptime builtin.os.tag == .linux and @hasDecl(apprt.runtime, "post_fork")) apprt.runtime.post_fork.postFork else null,
             .rt_post_fork_info = self.rt_post_fork_info,
             .data = self,
         };

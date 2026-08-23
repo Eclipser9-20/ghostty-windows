@@ -282,8 +282,10 @@ pub const Application = extern struct {
         };
         defer config.deinit();
 
-        // Set the old language,
-        const saved_language: ?[:0]const u8 = saved_language: {
+        // Set the old language. LANG-based gettext handling is POSIX-only
+        // (Environ.getPosix has no Windows equivalent), and i18n defaults
+        // off on Windows anyway.
+        const saved_language: ?[:0]const u8 = if (comptime builtin.os.tag == .windows) null else saved_language: {
             const old_language = old_language: {
                 const lang = global.environ().getPosix("LANG") orelse break :old_language null;
                 break :old_language alloc.dupeSentinel(u8, @ptrCast(lang), 0) catch null;
@@ -1376,8 +1378,8 @@ pub const Application = extern struct {
         // Setup our style manager (light/dark mode)
         self.startupStyleManager();
 
-        // Setup some signal handlers
-        self.startupSignals();
+        // Setup some signal handlers. SIGUSR2 doesn't exist on Windows.
+        if (comptime builtin.os.tag != .windows) self.startupSignals();
 
         // Setup our action map
         self.startupActionMap();
