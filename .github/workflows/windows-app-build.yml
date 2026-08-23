@@ -67,4 +67,12 @@ jobs:
           PYTHONIOENCODING: "utf-8"
         run: |
           pkg-config --libs gtk4
-          zig build -Dapp-runtime=gtk -Dtarget=x86_64-windows-gnu
+          # -Dsimd=false: Zig 0.16's bundled libc++ appears structurally
+          # broken for the x86_64-windows-gnu target when compiling the
+          # vendored SIMD .cpp files (highway/simdutf) — a libc++
+          # self-check ("tried including <string.h> but didn't find
+          # libc++'s own") fails regardless of link_libcpp settings. This
+          # skips that C++ compilation entirely in favor of portable Zig
+          # fallbacks, to get a working baseline build; SIMD accel on
+          # Windows can be revisited once the toolchain issue is understood.
+          zig build -Dapp-runtime=gtk -Dtarget=x86_64-windows-gnu -Dsimd=false
